@@ -1,16 +1,10 @@
-import {
-  Body,
-  Controller,
-  HttpCode,
-  Inject,
-  Param,
-  Put,
-} from '@midwayjs/decorator';
+import { Body, Controller, Inject, Param, Put } from '@midwayjs/decorator';
 import { Context } from '@midwayjs/koa';
 import { InjectEntityModel } from '@midwayjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../entity/user';
 import { Md5 } from 'ts-md5';
+import { PasswordInfo, UserInfo } from '../interface';
 
 @Controller('/user')
 export class UserController {
@@ -20,7 +14,7 @@ export class UserController {
   ctx: Context;
 
   @Put('/:id')
-  async updateUserInfo(@Param('id') id: number, @Body() userInfo) {
+  async updateUserInfo(@Param('id') id: number, @Body() userInfo: UserInfo) {
     const { name, avatar } = userInfo;
     const user = await this.userModel.findOneBy({ id });
     if (!user) {
@@ -28,6 +22,7 @@ export class UserController {
       this.ctx.body = {
         data: '用户不存在',
       };
+      return;
     }
     if (name) {
       user.name = name;
@@ -39,7 +34,10 @@ export class UserController {
   }
 
   @Put('/password/:id')
-  async updateUserPassword(@Param('id') id: number, @Body() passwordInfo) {
+  async updateUserPassword(
+    @Param('id') id: number,
+    @Body() passwordInfo: PasswordInfo
+  ) {
     const { old_password: oldPassword, new_password: newPassword } =
       passwordInfo;
     const user = await this.userModel.findOneBy({ id });
@@ -48,6 +46,7 @@ export class UserController {
       this.ctx.body = {
         data: '用户不存在',
       };
+      return;
     }
     const { password } = user;
     if (Md5.hashStr(oldPassword) === password) {

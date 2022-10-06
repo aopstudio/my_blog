@@ -6,18 +6,14 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
-@Entity('Article')
-export class Article {
+@Entity('TagArticle')
+export class TagArticle {
   @PrimaryGeneratedColumn()
   id: number;
   @Column()
-  author: string;
+  tag: string;
   @Column()
-  title: string;
-  @Column('text')
-  content: string;
-  @Column()
-  tags: string;
+  article_id: number;
   @CreateDateColumn()
   create_at: string;
   @UpdateDateColumn()

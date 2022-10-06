@@ -1,5 +1,6 @@
 import { MidwayConfig } from '@midwayjs/core';
 import { Article } from '../entity/article';
+import { TagArticle } from '../entity/tag_article';
 import { User } from '../entity/user';
 
 export default {
@@ -23,11 +24,11 @@ export default {
         username: 'root',
         password: '',
         database: 'my_blog',
-        synchronize: false, // 如果第一次使用，不存在表，有同步的需求可以写 true
+        synchronize: true, // 如果第一次使用，不存在表，有同步的需求可以写 true
         logging: false,
 
         // 配置实体模型 或者 entities: '/entity',
-        entities: [Article, User],
+        entities: [Article, User, TagArticle],
       },
     },
   },
