@@ -8,10 +8,11 @@ import {
   Post,
   Put,
   Del,
+  Query,
 } from '@midwayjs/decorator';
 import { Context } from '@midwayjs/koa';
 import { InjectEntityModel } from '@midwayjs/typeorm';
-import { Repository } from 'typeorm';
+import { Between, LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
 import { Article } from '../entity/article';
 import { TagArticle } from '../entity/tag_article';
 import { ArticleInfo } from '../interface';
@@ -27,7 +28,7 @@ export class ArticleController {
 
   @Post('/')
   @HttpCode(201)
-  async addArticle(@Body() newArticle: ArticleInfo) {
+  async create(@Body() newArticle: ArticleInfo) {
     const article = await this.articleModel.save(newArticle);
     const { id: article_id, tags } = article;
     const tagList = tags.split(';');
@@ -44,19 +45,65 @@ export class ArticleController {
   }
 
   @Get('/:id')
-  async getArticleById(@Param('id') id: number) {
+  async show(@Param('id') id: number) {
     const article = await this.articleModel.findOneBy({ id });
     this.ctx.body = {
       data: article,
     };
   }
 
+  @Get('/')
+  async index(@Query() articleQuery) {
+    const {
+      id,
+      author,
+      title,
+      create_after,
+      create_before,
+      limit = 10,
+      page = 1,
+    } = articleQuery;
+    const where: any = {};
+    if (id) {
+      where.id = id;
+    }
+    if (author) {
+      where.author = author;
+    }
+    if (title) {
+      where.title = title;
+    }
+    let after_flag = 0;
+    if (create_after) {
+      where.create_at = MoreThanOrEqual(create_after);
+      after_flag = 1;
+    }
+    if (create_before) {
+      if (after_flag) {
+        where.create_at = Between(create_after, create_before);
+      } else {
+        where.create_at = LessThanOrEqual(create_before);
+      }
+    }
+    const articleInfo = await this.articleModel.findAndCount({
+      where,
+      order: { create_at: 'DESC' },
+      take: limit,
+      skip: (page - 1) * limit,
+    });
+    this.ctx.body = {
+      data: articleInfo[0],
+      meta: {
+        page,
+        limit,
+        count: articleInfo[1],
+      },
+    };
+  }
+
   @Put('/:id')
   @HttpCode(204)
-  async updateArticleById(
-    @Param('id') id: number,
-    @Body() articleInfo: ArticleInfo
-  ) {
+  async update(@Param('id') id: number, @Body() articleInfo: ArticleInfo) {
     const { author, title, content, tags } = articleInfo;
     const article = await this.articleModel.findOneBy({ id });
     if (author) {
@@ -76,7 +123,7 @@ export class ArticleController {
   }
 
   @Del('/:id')
-  async deleteArticleById(@Param('id') id: number) {
+  async destroy(@Param('id') id: number) {
     await this.articleModel.delete({ id });
     this.ctx.status = 204;
   }

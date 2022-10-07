@@ -25,7 +25,7 @@ export default {
         password: '',
         database: 'my_blog',
         synchronize: true, // 如果第一次使用，不存在表，有同步的需求可以写 true
-        logging: false,
+        logging: true,
 
         // 配置实体模型 或者 entities: '/entity',
         entities: [Article, User, TagArticle],

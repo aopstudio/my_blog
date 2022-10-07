@@ -14,7 +14,7 @@ export class UserController {
   ctx: Context;
 
   @Put('/:id')
-  async updateUserInfo(@Param('id') id: number, @Body() userInfo: UserInfo) {
+  async update(@Param('id') id: number, @Body() userInfo: UserInfo) {
     const { name, avatar } = userInfo;
     const user = await this.userModel.findOneBy({ id });
     if (!user) {
@@ -34,7 +34,7 @@ export class UserController {
   }
 
   @Put('/password/:id')
-  async updateUserPassword(
+  async updatePassword(
     @Param('id') id: number,
     @Body() passwordInfo: PasswordInfo
   ) {
