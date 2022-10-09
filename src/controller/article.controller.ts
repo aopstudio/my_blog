@@ -120,10 +120,19 @@ export class ArticleController {
     if (content) {
       article.content = content;
     }
+    let tagList = [];
     if (tags) {
       article.tags = tags;
+      tagList = tags.split(';');
     }
     await this.articleModel.save(article);
+    for (const tag of tagList) {
+      const newTagArticle = {
+        tag,
+        article_id: id,
+      };
+      this.tagArticleModel.save(newTagArticle);
+    }
     this.ctx.status = 204;
   }
 
