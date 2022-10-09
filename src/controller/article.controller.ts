@@ -55,17 +55,22 @@ export class ArticleController {
   @Get('/')
   async index(@Query() articleQuery) {
     const {
-      id,
       author,
       title,
       create_after,
       create_before,
       limit = 10,
+      tag,
       page = 1,
     } = articleQuery;
     const where: any = {};
-    if (id) {
-      where.id = id;
+    if (tag) {
+      const article_ids_obj = await this.tagArticleModel.find({
+        select: ['article_id'],
+        where: { tag },
+      });
+      const article_ids = article_ids_obj.map(a => a.article_id);
+      where.id = article_ids;
     }
     if (author) {
       where.author = author;
